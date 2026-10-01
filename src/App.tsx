@@ -1,27 +1,67 @@
-import { useRef } from 'react'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
-import { Button } from '@/components/ui/button'
-import { ThreeCube } from '@/experiments/three-cube'
+import { useEffect, useState } from 'react'
+import { Toaster } from '@/components/ui/sonner'
+import ConsolidatedSearchExperiment from '@/experiments/consolidated-search'
+import DataTablesExperiment from '@/experiments/data-tables'
+import NodeBasedAssignmentExperiment from '@/experiments/node-based-assignment/node-based-assignment'
+import DeviceInfoExperiment from '@/experiments/device-info'
+
+// Simple navigation without a router library: the part of the URL after "#"
+// decides which screen shows. "#/device-info" opens the Device info experiment;
+// anything else shows the home screen.
+// TO ADD AN EXPERIMENT: import it above, then add a line to `experiments` below.
+const experiments = [
+  { path: '/device-info', title: 'Device info', page: DeviceInfoExperiment },
+  { path: '/data-tables', title: 'Data tables', page: DataTablesExperiment },
+  { path: '/consolidated-search', title: 'Consolidated search', page: ConsolidatedSearchExperiment },
+  { path: '/node-based-assignment', title: 'Node based assignment', page: NodeBasedAssignmentExperiment },
+]
 
 export default function App() {
-  const root = useRef<HTMLDivElement>(null)
+  // Remember the current "#" part of the URL, and update it when it changes.
+  const [currentPath, setCurrentPath] = useState(window.location.hash.slice(1))
+  useEffect(() => {
+    const updatePath = () => setCurrentPath(window.location.hash.slice(1))
+    window.addEventListener('hashchange', updatePath)
+    return () => window.removeEventListener('hashchange', updatePath)
+  }, [])
 
-  useGSAP(
-    () => {
-      gsap.from('.reveal', { y: 24, opacity: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out' })
-    },
-    { scope: root },
-  )
+  // If the URL matches an experiment, show that experiment.
+  const openExperiment = experiments.find((experiment) => experiment.path === currentPath)
+  if (openExperiment) {
+    const ExperimentPage = openExperiment.page
+    return (
+      <>
+        <ExperimentPage />
+        {/* Shows toast messages (like "Export successful") for every experiment. */}
+        <Toaster />
+      </>
+    )
+  }
 
+  // Otherwise show the home screen.
   return (
-    <div ref={root} className="mx-auto flex min-h-svh max-w-2xl flex-col items-center justify-center gap-6 p-8">
-      <h1 className="reveal text-3xl font-semibold tracking-tight">DesignLab</h1>
-      <p className="reveal text-muted-foreground">React · Tailwind · shadcn/ui · GSAP · Three.js</p>
-      <div className="reveal h-64 w-full overflow-hidden rounded-xl border">
-        <ThreeCube />
-      </div>
-      <Button className="reveal">Start experimenting</Button>
-    </div>
+    <main className="min-h-svh p-8 md:p-12">
+      <header className="pt-12 text-left">
+        <h1 className="font-sans text-7xl font-bold tracking-tight md:text-7xl">
+          Juan's Design Lab
+        </h1>
+        <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+          This is where I will play around with crazy ideas that don't fit anywhere else
+        </p>
+      </header>
+
+      {/* One link per experiment. */}
+      <nav className="mt-12 flex flex-col items-start gap-2">
+        {experiments.map((experiment) => (
+          <a
+            key={experiment.path}
+            href={`#${experiment.path}`}
+            className="text-lg font-medium underline underline-offset-4"
+          >
+            {experiment.title}
+          </a>
+        ))}
+      </nav>
+    </main>
   )
 }
