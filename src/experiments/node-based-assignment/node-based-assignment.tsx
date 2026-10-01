@@ -12,6 +12,7 @@ import {
   type StagedOperation,
 } from './assignment-rules'
 import { DeviceNode } from './components/device-node'
+import { setDragLabel } from './components/drag-image'
 import { GroupBackdrop } from './components/group-backdrop'
 import { GroupConnector } from './components/group-connector'
 import { GroupNode } from './components/group-node'
@@ -795,6 +796,7 @@ export default function NodeBasedAssignmentExperiment() {
           if (item.kind !== 'device') return
           event.dataTransfer.setData('text/plain', item.id) // browsers need some data to allow a drag
           event.dataTransfer.effectAllowed = 'move'
+          setDragLabel(event.dataTransfer, devicesById.get(item.id)?.name ?? 'Device') // our own label under the pointer
           setDraggedDevice({ deviceId: item.id, fromGroupId: item.groupId })
         }}
         onDragEnd={() => {

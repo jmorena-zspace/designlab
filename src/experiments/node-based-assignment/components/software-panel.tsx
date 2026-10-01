@@ -2,6 +2,7 @@ import { memo, useState } from 'react'
 import { PackageIcon } from 'lucide-react'
 import { getSeatsLeft, salesOrders, type SalesOrder, type SeatUsage } from '../data/assignment-data'
 import type { DraggedSoftware } from '../assignment-rules'
+import { setDragLabel } from './drag-image'
 import { SearchBox } from './search-box'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
@@ -54,16 +55,6 @@ function filterSalesOrders(query: string): { order: SalesOrder; pools: SalesOrde
       return { order, pools }
     })
     .filter((entry) => entry.pools.length > 0)
-}
-
-// A small label shown under the pointer while dragging several titles at once.
-function makeDragImage(count: number): HTMLElement {
-  const label = document.createElement('div')
-  label.textContent = `${count} software titles`
-  label.style.cssText =
-    'position:fixed;top:-100px;left:-100px;padding:8px 14px;border-radius:12px;background:#171717;color:white;font:500 13px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.25)'
-  document.body.appendChild(label)
-  return label
 }
 
 function SoftwarePanelContent({
@@ -178,11 +169,11 @@ function SoftwarePanelContent({
                             // Browsers need some data to be set before they allow a drag.
                             event.dataTransfer.setData('text/plain', dragged.map((item) => item.software).join(', '))
                             event.dataTransfer.effectAllowed = 'copy'
-                            if (dragged.length > 1) {
-                              const dragImage = makeDragImage(dragged.length)
-                              event.dataTransfer.setDragImage(dragImage, 20, 20)
-                              setTimeout(() => dragImage.remove(), 0) // (the browser has copied it by then)
-                            }
+                            // Our own label under the pointer: the title, or "3 software titles".
+                            setDragLabel(
+                              event.dataTransfer,
+                              dragged.length > 1 ? `${dragged.length} software titles` : dragged[0].software,
+                            )
                             onDragStartSoftware(dragged)
                           }}
                           onDragEnd={onDragEndSoftware}
