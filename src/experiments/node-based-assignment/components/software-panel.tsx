@@ -1,11 +1,13 @@
 import { memo, useState } from 'react'
-import { GripVerticalIcon, PackageIcon } from 'lucide-react'
+import { PackageIcon } from 'lucide-react'
 import { getSeatsLeft, salesOrders, type SalesOrder, type SeatUsage } from '../data/assignment-data'
 import type { DraggedSoftware } from '../assignment-rules'
 import { SearchBox } from './search-box'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Progress } from '@/components/ui/progress'
 
 // The panel on the left: the software seats still available, organized as
@@ -17,7 +19,9 @@ import { Progress } from '@/components/ui/progress'
 //
 // Each software row can be:
 //   - HOVERED: the page highlights the nodes that already have that software;
-//   - DRAGGED: drop it on a group or a device to stage an assignment.
+//   - CLICKED: ticks / unticks it, so you can select several titles;
+//   - DRAGGED: drop it on a group or a device to stage an assignment. If the row is one of
+//     the ticked ones, ALL the ticked rows are dragged together; otherwise just this one.
 //
 // Seats used come from `seatUsage`, a lookup the page rebuilds whenever assignments
 // change (including staged ones), so this panel updates by itself.
@@ -52,15 +56,31 @@ function filterSalesOrders(query: string): { order: SalesOrder; pools: SalesOrde
     .filter((entry) => entry.pools.length > 0)
 }
 
+// A small label shown under the pointer while dragging several titles at once.
+function makeDragImage(count: number): HTMLElement {
+  const label = document.createElement('div')
+  label.textContent = `${count} software titles`
+  label.style.cssText =
+    'position:fixed;top:-100px;left:-100px;padding:8px 14px;border-radius:12px;background:#171717;color:white;font:500 13px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.25)'
+  document.body.appendChild(label)
+  return label
+}
+
 function SoftwarePanelContent({
   seatUsage,
+  selectedSoftware,
+  onToggleSelected,
+  onClearSelection,
   onHoverSoftware,
   onDragStartSoftware,
   onDragEndSoftware,
 }: {
   seatUsage: SeatUsage // how many seats of each pool are in use right now
+  selectedSoftware: DraggedSoftware[] // the ticked rows
+  onToggleSelected: (dragged: DraggedSoftware) => void
+  onClearSelection: () => void
   onHoverSoftware: (softwareName: string | null) => void
-  onDragStartSoftware: (dragged: DraggedSoftware) => void
+  onDragStartSoftware: (dragged: DraggedSoftware[]) => void // the list of titles being dragged
   onDragEndSoftware: () => void
 }) {
   const [query, setQuery] = useState('')
@@ -105,7 +125,16 @@ function SoftwarePanelContent({
             <PackageIcon className="size-4 text-muted-foreground" />
             Available software
           </CardTitle>
-          <CardDescription>Seats left, by sales order. Drag one onto a group or device.</CardDescription>
+          <CardDescription>Seats left, by sales order. Tick several and drag them together onto a group or device.</CardDescription>
+          {/* Appears while some rows are ticked. */}
+          {selectedSoftware.length > 0 && (
+            <div className="mt-1 flex items-center justify-between rounded-lg bg-blue-50 py-1 pr-1 pl-3 text-sm text-blue-900">
+              {selectedSoftware.length} selected
+              <Button size="xs" variant="ghost" onClick={onClearSelection}>
+                Clear
+              </Button>
+            </div>
+          )}
         </CardHeader>
 
         {/* `overflow-y-auto` makes the list scroll if there are many sales orders. */}
@@ -130,6 +159,10 @@ function SoftwarePanelContent({
                     {pools.map((pool) => {
                       const left = getSeatsLeft(seatUsage, order.id, pool.software)
                       const share = (pool.seats - left) / pool.seats
+                      const thisSoftware: DraggedSoftware = { salesOrderId: order.id, software: pool.software }
+                      const isSelected = selectedSoftware.some(
+                        (selected) => selected.salesOrderId === order.id && selected.software === pool.software,
+                      )
                       return (
                         // The draggable row. HTML's built-in drag and drop does the work:
                         // `draggable` makes it pick-up-able, and the handlers tell the page
@@ -137,21 +170,32 @@ function SoftwarePanelContent({
                         <div
                           key={pool.software}
                           draggable
+                          onClick={() => onToggleSelected(thisSoftware)}
                           onDragStart={(event) => {
+                            // Dragging a ticked row takes all the ticked rows along; dragging an
+                            // unticked row takes just that one.
+                            const dragged = isSelected ? selectedSoftware : [thisSoftware]
                             // Browsers need some data to be set before they allow a drag.
-                            event.dataTransfer.setData('text/plain', pool.software)
+                            event.dataTransfer.setData('text/plain', dragged.map((item) => item.software).join(', '))
                             event.dataTransfer.effectAllowed = 'copy'
-                            onDragStartSoftware({ salesOrderId: order.id, software: pool.software })
+                            if (dragged.length > 1) {
+                              const dragImage = makeDragImage(dragged.length)
+                              event.dataTransfer.setDragImage(dragImage, 20, 20)
+                              setTimeout(() => dragImage.remove(), 0) // (the browser has copied it by then)
+                            }
+                            onDragStartSoftware(dragged)
                           }}
                           onDragEnd={onDragEndSoftware}
                           onMouseEnter={() => onHoverSoftware(pool.software)}
                           onMouseLeave={() => onHoverSoftware(null)}
-                          className="group/row -mx-2 flex cursor-grab flex-col gap-1.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted active:cursor-grabbing"
+                          className={`-mx-2 flex cursor-grab flex-col gap-1.5 rounded-lg px-2 py-1.5 transition-colors active:cursor-grabbing ${
+                            isSelected ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-muted'
+                          }`}
                         >
                           <div className="flex items-baseline justify-between gap-2 text-sm">
-                            <span className="flex min-w-0 items-center gap-1">
-                              {/* A grip icon that appears on hover, hinting "you can drag this". */}
-                              <GripVerticalIcon className="-ml-1 size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/row:opacity-100" />
+                            <span className="flex min-w-0 items-center gap-2">
+                              {/* The tick box. It only SHOWS the state; clicking anywhere on the row toggles it. */}
+                              <Checkbox checked={isSelected} className="pointer-events-none translate-y-0.5" tabIndex={-1} aria-hidden />
                               <span className="truncate">{pool.software}</span>
                             </span>
                             <span className="shrink-0 text-muted-foreground tabular-nums">

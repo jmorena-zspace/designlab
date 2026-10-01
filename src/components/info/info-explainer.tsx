@@ -13,7 +13,8 @@ export function InfoExplainer({ title, children }: { title: string; children: Re
   return (
     // Pinned to the top-right corner of the screen.
     // TWEAK: change top-6 / right-6 to move it, or swap for bottom-6 to put it at the bottom.
-    <div className="fixed top-6 right-6 z-10 flex flex-col items-end gap-3">
+    // z-[2000] keeps it above everything on the page, even experiments with floating panels.
+    <div className="fixed top-6 right-6 z-[2000] flex flex-col items-end gap-3">
       <Button
         variant="outline"
         size="icon"

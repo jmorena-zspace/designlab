@@ -15,19 +15,20 @@ const statusStyles: Record<SoftwareStatus, { badge: string; dot: string }> = {
 }
 
 // A device card: its name and sales order, its serial number, and the software
-// assigned to it, each with a status. Drop software on it to assign just this device.
+// assigned to it, each with a status. Drop software on it to assign just this device,
+// or drag the card itself onto another group to move it there (the page handles both).
 // The spacing here (padding, row heights) matches the numbers in layout.ts, which
 // is how the layout knows how tall the card is. Change one, change the other.
 export function DeviceNode({
   device,
   emphasis,
   dropState,
-  activeSoftware,
+  activeSoftwareNames,
 }: {
   device: Device
   emphasis: Emphasis
   dropState: DropState
-  activeSoftware: string | null // the software being hovered / dragged; its row is marked
+  activeSoftwareNames: string[] // the software being hovered / dragged; its rows are marked
 }) {
   return (
     <div
@@ -58,7 +59,7 @@ export function DeviceNode({
             key={software.name}
             // The row for the software being hovered / dragged gets a blue tint.
             className={`-mx-2 flex items-center justify-between gap-2 rounded-md px-2 transition-colors ${
-              software.name === activeSoftware ? 'bg-blue-100' : ''
+              activeSoftwareNames.includes(software.name) ? 'bg-blue-100' : ''
             }`}
             style={{ height: deviceSoftwareRowHeight }}
           >
