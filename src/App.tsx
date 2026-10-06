@@ -4,6 +4,7 @@ import ConsolidatedSearchExperiment from '@/experiments/consolidated-search'
 import DataTablesExperiment from '@/experiments/data-tables'
 import NodeBasedAssignmentExperiment from '@/experiments/node-based-assignment/node-based-assignment'
 import DeviceInfoExperiment from '@/experiments/device-info'
+import ThreeDProjectionMobileExperiment from '@/experiments/3d-projection-mobile/3d-projection-mobile'
 
 // Simple navigation without a router library: the part of the URL after "#"
 // decides which screen shows. "#/device-info" opens the Device info experiment;
@@ -14,6 +15,7 @@ const experiments = [
   { path: '/data-tables', title: 'Data tables', page: DataTablesExperiment },
   { path: '/consolidated-search', title: 'Consolidated search', page: ConsolidatedSearchExperiment },
   { path: '/node-based-assignment', title: 'Node based assignment', page: NodeBasedAssignmentExperiment },
+  { path: '/3d-projection-mobile', title: '3D projection mobile', page: ThreeDProjectionMobileExperiment },
 ]
 
 export default function App() {
