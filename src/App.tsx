@@ -4,6 +4,7 @@ import ConsolidatedSearchExperiment from '@/experiments/consolidated-search'
 import DataTablesExperiment from '@/experiments/data-tables'
 import NodeBasedAssignmentExperiment from '@/experiments/node-based-assignment/node-based-assignment'
 import DeviceInfoExperiment from '@/experiments/device-info'
+import StudioRigExperiment from '@/experiments/studio-rig/studio-rig'
 import ThreeDProjectionMobileExperiment from '@/experiments/3d-projection-mobile/3d-projection-mobile'
 
 // Simple navigation without a router library: the part of the URL after "#"
@@ -16,6 +17,7 @@ const experiments = [
   { path: '/consolidated-search', title: 'Consolidated search', page: ConsolidatedSearchExperiment },
   { path: '/node-based-assignment', title: 'Node based assignment', page: NodeBasedAssignmentExperiment },
   { path: '/3d-projection-mobile', title: '3D projection mobile', page: ThreeDProjectionMobileExperiment },
+  { path: '/studio-rig', title: 'Studio rig', page: StudioRigExperiment },
 ]
 
 export default function App() {
