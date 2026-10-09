@@ -1,0 +1,290 @@
+/*
+  STAGE CHROME: the look of everything on the canvas that is NOT a workspace component:
+  the canvas background, frame titles, frame cards, variant names, selection outlines
+  and the error card.
+
+  This is plain CSS on purpose (not Tailwind). It's injected into the stage iframe next to
+  the workspace's own CSS, and it must look the same whatever design system is loaded
+  there. If it used Tailwind classes, an imported project with a different Tailwind setup
+  (or none) could break the canvas itself.
+
+  Every class starts with "cc-" (component canvas) so it can't clash with a workspace's classes.
+*/
+
+/* ── Page ─────────────────────────────────────────────────────────────────── */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* TWEAK: the editor font for labels on the canvas (system UI font, like Figma). */
+.cc-stage {
+  --cc-ui-font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  /* TWEAK: --cc-blue — selection and active-title color (Figma blue is #0d99ff). */
+  --cc-blue: #0d99ff;
+  /* TWEAK: --cc-canvas — the canvas background; --cc-dot — the grid dots. */
+  --cc-canvas: #f5f5f5;
+  --cc-dot: rgba(0, 0, 0, 0.13);
+  --cc-label: #8c8c8c;
+
+  position: fixed;
+  inset: 0;
+}
+
+/* ── Canvas (viewport + world) ───────────────────────────────────────────── */
+.cc-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--cc-canvas);
+  /* One tiny dot per tile. infinite-canvas.tsx moves and resizes the tiles with the camera. */
+  background-image: radial-gradient(circle at 1px 1px, var(--cc-dot) 1px, transparent 0);
+  background-size: 20px 20px;
+  /* We handle pinch and drag ourselves. */
+  touch-action: none;
+  --cc-scale: 1;
+}
+
+.cc-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
+  transform-origin: 0 0;
+}
+
+/* The frames, laid out in a grid. Columns and gap are set inline from stage-iframe.tsx. */
+.cc-frame-grid {
+  display: grid;
+  align-items: start;
+}
+
+/* Space held = hand tool: grab cursor everywhere, grabbing while dragging. */
+html[data-space-held] .cc-viewport,
+html[data-space-held] .cc-viewport * {
+  cursor: grab !important;
+}
+html[data-panning] .cc-viewport,
+html[data-panning] .cc-viewport * {
+  cursor: grabbing !important;
+}
+
+/* ── Design mode ─────────────────────────────────────────────────────────── */
+/* In Design mode every layer must be clickable, even ones the component made
+   un-clickable (disabled buttons and inputs use `pointer-events: none`, icons too).
+   Otherwise the click would fall through and you could never select them. */
+.cc-stage[data-mode='design'] .cc-frame-body [data-node-id] {
+  pointer-events: auto !important;
+  cursor: default;
+}
+.cc-stage[data-mode='design'] .cc-frame-body {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* The text being edited in place. */
+.cc-stage .cc-text-editing {
+  cursor: text !important;
+  user-select: text;
+  -webkit-user-select: text;
+  outline: none;
+  caret-color: var(--cc-blue);
+}
+
+/* ── Frames ──────────────────────────────────────────────────────────────── */
+.cc-frame {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The title row. Its sizes are divided by the zoom (--cc-scale) so it stays the same
+   size ON SCREEN at every zoom level, like frame names in Figma. */
+.cc-frame-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8px / var(--cc-scale));
+  height: calc(24px / var(--cc-scale));
+  margin-bottom: calc(4px / var(--cc-scale));
+  font-family: var(--cc-ui-font);
+  font-size: calc(11px / var(--cc-scale));
+  line-height: 1;
+  color: var(--cc-label);
+  -webkit-font-smoothing: antialiased;
+}
+
+.cc-frame-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 120ms ease;
+}
+.cc-frame-title[data-active] {
+  color: var(--cc-blue);
+}
+
+.cc-theme-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: calc(20px / var(--cc-scale));
+  height: calc(20px / var(--cc-scale));
+  padding: 0;
+  border: 0;
+  border-radius: calc(4px / var(--cc-scale));
+  background: transparent;
+  color: var(--cc-label);
+  cursor: pointer;
+  opacity: 0.8;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    opacity 120ms ease;
+}
+.cc-theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #3a3a3a;
+  opacity: 1;
+}
+.cc-theme-toggle svg {
+  width: calc(12px / var(--cc-scale));
+  height: calc(12px / var(--cc-scale));
+}
+
+/* The card that holds the variants. var(--background)/var(--foreground) come from the
+   workspace's theme (shadcn's variable names); the fallbacks keep it white/black otherwise.
+   With the `dark` class the workspace's .dark values apply, so it turns dark. */
+.cc-frame-body {
+  /* TWEAK: padding — space inside the frame around the variants. */
+  padding: 32px 36px 36px;
+  border-radius: 10px;
+  background: var(--background, #ffffff);
+  color: var(--foreground, #0a0a0a);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px -12px rgba(0, 0, 0, 0.12);
+}
+.cc-frame-body.dark {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 8px 24px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* Variants inside a frame. Column count is set inline (component-frame.tsx). */
+.cc-variant-grid {
+  display: grid;
+  /* TWEAK: row gap / column gap between variants. */
+  gap: 28px 40px;
+  align-items: start;
+}
+
+.cc-variant-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 64px;
+}
+
+.cc-variant-name {
+  font-family: var(--cc-ui-font);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 400;
+  /* Muted version of the frame's text color, so it works in light and dark frames. */
+  color: color-mix(in srgb, currentColor 42%, transparent);
+  -webkit-font-smoothing: antialiased;
+  white-space: nowrap;
+}
+
+/* Lets each component keep its natural width (w-fit badges, w-80 cards…). */
+.cc-variant-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* ── Error card (variant-error-boundary.tsx) ─────────────────────────────── */
+.cc-error-card {
+  max-width: 260px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  font-family: var(--cc-ui-font);
+  font-size: 11px;
+  line-height: 1.45;
+  color: #6b6b6b;
+}
+.dark .cc-error-card {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: #a3a3a3;
+}
+.cc-error-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.cc-error-message {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
+  word-break: break-word;
+  opacity: 0.85;
+}
+
+/* Unknown component type (node-renderer.tsx). */
+.cc-missing-component {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px dashed #e5484d;
+  border-radius: 4px;
+  font-family: var(--cc-ui-font);
+  font-size: 11px;
+  color: #e5484d;
+}
+
+/* ── Selection overlay (selection-overlay.tsx) ───────────────────────────── */
+/* Fixed on top of the canvas, never zoomed, so lines stay crisp. Clicks pass through. */
+.cc-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+.cc-outline {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: none;
+  box-sizing: border-box;
+}
+.cc-outline-hover {
+  border: 1px solid var(--cc-blue);
+}
+.cc-outline-selected {
+  border: 1.5px solid var(--cc-blue);
+}
+
+/* "120 × 32" under the selected layer, centered. */
+.cc-size-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 6px;
+  transform: translateX(-50%);
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--cc-blue);
+  color: #ffffff;
+  font-family: var(--cc-ui-font);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}

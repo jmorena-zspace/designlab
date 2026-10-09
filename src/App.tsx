@@ -6,6 +6,7 @@ import NodeBasedAssignmentExperiment from '@/experiments/node-based-assignment/n
 import DeviceInfoExperiment from '@/experiments/device-info'
 import StudioRigExperiment from '@/experiments/studio-rig/studio-rig'
 import ThreeDProjectionMobileExperiment from '@/experiments/3d-projection-mobile/3d-projection-mobile'
+import ComponentCanvasExperiment from '@/experiments/component-canvas/component-canvas'
 
 // Simple navigation without a router library: the part of the URL after "#"
 // decides which screen shows. "#/device-info" opens the Device info experiment;
@@ -18,6 +19,7 @@ const experiments = [
   { path: '/node-based-assignment', title: 'Node based assignment', page: NodeBasedAssignmentExperiment },
   { path: '/3d-projection-mobile', title: '3D projection mobile', page: ThreeDProjectionMobileExperiment },
   { path: '/studio-rig', title: 'Studio rig', page: StudioRigExperiment },
+  { path: '/component-canvas', title: 'Component canvas', page: ComponentCanvasExperiment },
 ]
 
 export default function App() {
