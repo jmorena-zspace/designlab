@@ -7,6 +7,7 @@ import DeviceInfoExperiment from '@/experiments/device-info'
 import StudioRigExperiment from '@/experiments/studio-rig/studio-rig'
 import ThreeDProjectionMobileExperiment from '@/experiments/3d-projection-mobile/3d-projection-mobile'
 import ComponentCanvasExperiment from '@/experiments/component-canvas/component-canvas'
+import GlobalSearchExperiment from '@/experiments/global-search/global-search'
 
 // Simple navigation without a router library: the part of the URL after "#"
 // decides which screen shows. "#/device-info" opens the Device info experiment;
@@ -20,6 +21,7 @@ const experiments = [
   { path: '/3d-projection-mobile', title: '3D projection mobile', page: ThreeDProjectionMobileExperiment },
   { path: '/studio-rig', title: 'Studio rig', page: StudioRigExperiment },
   { path: '/component-canvas', title: 'Component canvas', page: ComponentCanvasExperiment },
+  { path: '/global-search', title: 'Global search', page: GlobalSearchExperiment },
 ]
 
 export default function App() {
