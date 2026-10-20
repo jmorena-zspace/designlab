@@ -1,0 +1,63 @@
+import type { Resource } from './types'
+
+// Resources: guides, worksheets and videos that belong to an application. All placeholders.
+// The application must match an app's name in apps.ts.
+// TO ADD ONE: copy a line and change it. resource(id, name, application)
+function resource(id: string, name: string, application: string): Resource {
+  return { type: 'resource', id: `resource-${id}`, name, application }
+}
+
+export const resources: Resource[] = [
+  resource('r1', 'Studio Getting Started Guide', 'Studio'),
+  resource('r2', 'Studio Model Library Overview', 'Studio'),
+  resource('r3', 'Studio Video: Using the Stylus', 'Studio'),
+  resource('r4', 'Studio Activity Builder Tutorial', 'Studio'),
+  resource('r5', "Newton's Park Teacher Guide", "Newton's Park A3"),
+  resource('r6', "Newton's Park Student Worksheet: Ramps", "Newton's Park A3"),
+  resource('r7', "Newton's Park Video: Roller Coasters", "Newton's Park A3"),
+  resource('r8', "Franklin's Lab Teacher Guide", "Franklin's Lab A3"),
+  resource('r9', "Franklin's Lab Circuit Worksheet", "Franklin's Lab A3"),
+  resource('r10', "Franklin's Lab Video: Building a Circuit", "Franklin's Lab A3"),
+  resource('r11', "Euclid's Shapes Teacher Guide", "Euclid's Shapes"),
+  resource('r12', "Euclid's Shapes Nets Worksheet", "Euclid's Shapes"),
+  resource('r13', 'Math Island Teacher Guide', 'Math Island A3'),
+  resource('r14', 'Math Island Fractions Worksheet', 'Math Island A3'),
+  resource('r15', 'Scholarlab Lab Safety Rules', 'Scholarlab Pro by Scholarlab'),
+  resource('r16', 'Scholarlab Chemistry Lab Report Template', 'Scholarlab Pro by Scholarlab'),
+  resource('r17', 'Electricity and Chemistry Teacher Notes', 'Scholarlab Simulations: Electricity and Chemistry'),
+  resource('r18', 'Solid State Chemistry Answer Key', 'Scholarlab Simulations: Solid State Chemistry'),
+  resource('r19', 'Acids and Bases pH Chart', 'Scholarlab Simulations: Acids and Bases'),
+  resource('r20', 'Optics Ray Diagram Worksheet', 'Scholarlab Simulations: Optics'),
+  resource('r21', 'zSpace Physics Teacher Guide', 'zSpace Physics'),
+  resource('r22', 'Sound Waves Lab Sheet', 'zSpace Physics'),
+  resource('r23', 'Visible Body+ Quick Start', 'Visible Body+'),
+  resource('r24', 'Heart Anatomy Labeling Worksheet', 'Visible Body+'),
+  resource('r25', 'BioDigital Human Lesson Ideas', 'BioDigital Human zSpace'),
+  resource('r26', 'Virtual ECG Rhythm Reference Card', 'Virtual ECG'),
+  resource('r27', 'Clinical Skills Certification Checklist', 'Clinical Skills Labs'),
+  resource('r28', 'Dental Procedures Glossary', 'Dental'),
+  resource('r29', 'Tinkercad Export to zSpace How-To', 'Tinkercad'),
+  resource('r30', 'Earthquake Challenge Rubric', 'Tinkercad'),
+  resource('r31', 'Automotive Shop Safety Video', 'Automotive Technician'),
+  resource('r32', 'Engine Components Diagram', 'Automotive Structure Technology'),
+  resource('r33', 'Brake Service Checklist', 'Automotive Maintenance and Repair'),
+  resource('r34', 'EV High Voltage Safety Guide', 'Electric Vehicle Maintenance'),
+  resource('r35', 'HVAC Refrigerant Handling Guide', 'HVAC Fundamentals'),
+  resource('r36', 'HVAC Residential Troubleshooting Flowchart', 'HVAC Residential'),
+  resource('r37', 'Robotics Safety Procedures', 'Industrial Robotics Training'),
+  resource('r38', 'Robot Programming Cheat Sheet', 'Industrial Robotics Operations'),
+  resource('r39', 'Hydraulic Symbols Reference', 'Applied Hydraulics'),
+  resource('r40', 'Pneumatic Symbols Reference', 'Applied Pneumatics'),
+  resource('r41', 'Measurement Tools Practice Sheet', 'Precision Measurement'),
+  resource('r42', 'Welding Safety Video', 'Wave NG Welder'),
+  resource('r43', 'Poultry Cutting Guide', 'Mimbus Food'),
+  resource('r44', 'Career Explorer Student Journal', 'Career Explorer'),
+  resource('r45', 'Computer Science Essentials Pacing Guide', 'Computer Science Essentials'),
+  resource('r46', 'Unity Programming Project Starter Files', 'Unity Programming'),
+  resource('r47', 'Visualizer Sample Datasets', 'Visualizer'),
+  resource('r48', 'Tilt Brush Brush Reference', 'Tilt Brush'),
+  resource('r49', 'ShapeLab Sculpting Tips', 'ShapeLab'),
+  resource('r50', 'zView Setup Guide', 'zView'),
+  resource('r51', 'Renewable Energy Project Ideas', 'Renewable Energy Fundamentals'),
+  resource('r52', 'Process Technology Glossary', 'Process Technology Core'),
+]
